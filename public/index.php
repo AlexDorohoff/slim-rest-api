@@ -14,7 +14,7 @@ $config = ['settings' => [
 $app = new Slim\App($config);
 
 $app->get('/', function ($request, $response, $args) {
-    return $response->write("Hello ");
+    return $response->withJson("Hello ");
 });
 
 $app->get('/users', UserController::class . ':index');

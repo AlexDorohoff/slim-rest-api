@@ -1,11 +1,9 @@
 <?php
 
-namespace App\models;
+namespace App\repository;
 
 class User
 {
-    public $id;
-    public $name;
 
     public function getOne($id)
     {
