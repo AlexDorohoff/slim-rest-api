@@ -52,7 +52,7 @@ class UserController
     public function save(Request $request, Response $response, $args){
         $model = new User();
         $user = $model->save($request);
-        $response->getBody()->write($user);
+        $response->getBody()->write(json_encode($user));
         return $response;
     }
 }

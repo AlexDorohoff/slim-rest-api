@@ -2,53 +2,47 @@
 
 namespace App\repository;
 
+use App\storage\Database;
+
 class User
 {
 
+    private $db;
+
+    public function __construct()
+    {
+        $this->db = new Database();
+    }
+
     public function getOne($id)
     {
-        $file = file_get_contents('../users.json');
-        $taskList = json_decode($file, TRUE);
+        $json = $this->db->getData();
+        $taskList = json_decode($json, TRUE);
         foreach ($taskList as $key => $value) {
-            if (in_array($id, $value)) {
-                return json_encode($taskList[$id]);
+            if (!in_array($id, $value)) {
+                return json_encode([
+                    'code' => 1,
+                    'message' => 'not find',
+                ]);
             }
         }
-        return json_encode([
-            'code' => 1,
-            'message' => 'error',
-        ]);
+        return json_encode($taskList[$id]);
     }
 
     public function getAll()
     {
-        $json = file_get_contents('../users.json');
-        if (!$json) {
-            return json_encode([
-                'code' => 1,
-                'message' => 'error',
-            ]);
-        };
-        return $json;
+        return $this->db->getData();
     }
 
     public function save($request)
     {
-        $curLasrId = json_decode($this->getLastId());
+        $curLastId = json_decode($this->getLastId());
         $parsedRequest = $request->getParsedBody();
         $newname = $parsedRequest["name"];
-        $file = file_get_contents('../users.json');
+        $file = $this->db->getData();
         $taskList = json_decode($file, TRUE);
-
-        $taskList[] = array('id' => $curLasrId + 1, 'name' => $newname);
-        if (!file_put_contents('../users.json', json_encode($taskList))) {
-            unset($taskList);
-            return json_encode([
-                'code' => 1,
-                'message' => 'error',
-            ]);
-        };
-
+        $taskList[] = array('id' => $curLastId + 1, 'name' => $newname);
+        $this->db->putData($taskList);
         return $taskList;
     }
 
@@ -83,7 +77,7 @@ class User
 
     private function getLastId()
     {
-        $json = $this->getAll();
+        $json = $this->db->getData();
         $position = count(json_decode($json));
         $lastId = json_decode($json)[$position - 1];
         return $lastId->id;
